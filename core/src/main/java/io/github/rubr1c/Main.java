@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.github.rubr1c.entites.Entities;
 import io.github.rubr1c.entites.Entity;
-import io.github.rubr1c.util.Movements;
+import io.github.rubr1c.movement.Movements;
 import io.github.rubr1c.world.Platform;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
