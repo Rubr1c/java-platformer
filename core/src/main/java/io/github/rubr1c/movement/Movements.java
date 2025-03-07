@@ -24,7 +24,7 @@ public class Movements {
         float newY = object.getPos().y + object.getVelocityY() * deltaTime;
 
         boolean onGround = false;
-        for (Vector4 border : Platform.getBorders()) {
+        for (Vector4 border : Platform.getBORDERS()) {
             float futureY = newY;
             if (object.getVelocityY() < 0 && border.isCollidingBottom(new Pos(object.getPos().x, futureY), object.getWidth(), object.getHeight())) {
                 newY = border.getW();
@@ -51,7 +51,7 @@ public class Movements {
 
     public static <T extends Entity> void jump(T object) {
         if (object.isOnGround()) {
-            for (Vector4 border : Platform.getBorders()) {
+            for (Vector4 border : Platform.getBORDERS()) {
                 if (border.isCollidingTop(object.getPos(), object.getWidth(), object.getHeight())) {
                     return;
                 }

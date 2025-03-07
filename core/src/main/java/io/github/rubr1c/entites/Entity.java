@@ -1,5 +1,6 @@
 package io.github.rubr1c.entites;
 
+import com.badlogic.gdx.graphics.Texture;
 import io.github.rubr1c.util.Pos;
 
 public class Entity {
@@ -13,12 +14,15 @@ public class Entity {
     protected boolean onGround;
     protected float velocityY;
 
+    protected Texture texture;
+
     public Entity(Pos pos,
                   float speed,
                   float gravity,
                   int width,
                   int height,
-                  float jumpPower) {
+                  float jumpPower,
+                  Texture texture) {
         this.pos = pos;
         this.speed = speed;
         this.gravity = gravity;
@@ -27,6 +31,7 @@ public class Entity {
         this.jumpPower = jumpPower;
         this.onGround = false;
         this.velocityY = 0;
+        this.texture = texture;
     }
 
     public void setPos(Pos pos) {
@@ -103,5 +108,13 @@ public class Entity {
 
     public void setVelocityY(float velocityY) {
         this.velocityY = velocityY;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public void setTexture(Texture texture) {
+        this.texture = texture;
     }
 }
