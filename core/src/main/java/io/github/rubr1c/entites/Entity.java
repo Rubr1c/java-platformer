@@ -1,6 +1,8 @@
 package io.github.rubr1c.entites;
 
 import com.badlogic.gdx.graphics.Texture;
+import io.github.rubr1c.inventory.Inventory;
+import io.github.rubr1c.inventory.Item;
 import io.github.rubr1c.util.Pos;
 
 public class Entity {
@@ -13,6 +15,7 @@ public class Entity {
     protected float jumpPower;
     protected boolean onGround;
     protected float velocityY;
+    protected Inventory inventory;
 
     protected Texture texture;
 
@@ -22,7 +25,8 @@ public class Entity {
                   int width,
                   int height,
                   float jumpPower,
-                  Texture texture) {
+                  Texture texture,
+                  Inventory inventory) {
         this.pos = pos;
         this.speed = speed;
         this.gravity = gravity;
@@ -32,7 +36,25 @@ public class Entity {
         this.onGround = false;
         this.velocityY = 0;
         this.texture = texture;
+        this.inventory = inventory;
     }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
+    }
+
+    public void addToInventory(Item item) {
+        this.inventory.addItem(item);
+    }
+
+    public void addToInventory(Item item, int count) {
+        this.inventory.addItem(item, count);
+    }
+
 
     public void setPos(Pos pos) {
         this.pos = pos;

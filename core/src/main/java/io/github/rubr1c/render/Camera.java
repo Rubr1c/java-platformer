@@ -6,7 +6,7 @@ import io.github.rubr1c.entites.Entity;
 
 public class Camera {
     private OrthographicCamera camera;
-    private float lerp = 0.1f;
+    private final float lerp = 0.1f;
 
     public Camera() {
         camera = new OrthographicCamera();
@@ -17,10 +17,10 @@ public class Camera {
         // Smoothly interpolate camera position towards target
         float targetX = target.getPos().x;
         float targetY = target.getPos().y;
-        
+
         camera.position.x += (targetX - camera.position.x) * lerp;
         camera.position.y += (targetY - camera.position.y) * lerp;
-        
+
         camera.update();
     }
 
@@ -29,6 +29,5 @@ public class Camera {
     }
 
     public void dispose() {
-        // No resources to dispose currently
     }
 }
