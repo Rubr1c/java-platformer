@@ -20,7 +20,7 @@ public class Platform extends Shape {
         BORDERS.add(new Vector4(x, y, x + width, y + height));
     }
 
-    public static List<Vector4> getBORDERS() {
+    public static List<Vector4> getBorders() {
         return BORDERS;
     }
 }

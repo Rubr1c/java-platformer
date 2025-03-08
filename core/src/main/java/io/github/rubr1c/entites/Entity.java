@@ -8,6 +8,7 @@ import io.github.rubr1c.util.Pos;
 public class Entity {
 
     protected Pos pos;
+    protected Pos prevPos; // Previous position for movement direction detection
     protected float speed;
     protected float gravity;
     protected int width;
@@ -20,14 +21,15 @@ public class Entity {
     protected Texture texture;
 
     public Entity(Pos pos,
-                  float speed,
-                  float gravity,
-                  int width,
-                  int height,
-                  float jumpPower,
-                  Texture texture,
-                  Inventory inventory) {
+            float speed,
+            float gravity,
+            int width,
+            int height,
+            float jumpPower,
+            Texture texture,
+            Inventory inventory) {
         this.pos = pos;
+        this.prevPos = new Pos(pos.x, pos.y); // Initialize prevPos to current pos
         this.speed = speed;
         this.gravity = gravity;
         this.width = width;
@@ -55,17 +57,26 @@ public class Entity {
         this.inventory.addItem(item, count);
     }
 
-
     public void setPos(Pos pos) {
+        this.prevPos = this.pos; // Store current position as previous
         this.pos = pos;
     }
 
     public void setPos(Integer x, Integer y) {
+        this.prevPos = this.pos; // Store current position as previous
         this.pos = new Pos(x, y);
     }
 
     public Pos getPos() {
         return pos;
+    }
+
+    public Pos getPrevPos() {
+        return prevPos;
+    }
+
+    public void setPrevPos(Pos prevPos) {
+        this.prevPos = prevPos;
     }
 
     public float getSpeed() {

@@ -17,21 +17,6 @@ public class Vector4 {
         this.w = p2.y;
     }
 
-    public boolean isColliding(Pos pos, int width, int height) {
-        return pos.x < z && pos.x + width > x &&
-               pos.y < w && pos.y + height > y;
-    }
-
-    public boolean isCollidingTop(Pos pos, int width, int height) {
-        return pos.y + height >= y && pos.y < y &&
-               pos.x < z && pos.x + width > x;
-    }
-
-    public boolean isCollidingBottom(Pos pos, int width, int height) {
-        return pos.y <= w && pos.y + height > w &&
-               pos.x < z && pos.x + width > x;
-    }
-
     public float getY() {
         return y;
     }

@@ -1,6 +1,7 @@
 package io.github.rubr1c.screens;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import io.github.rubr1c.entites.Player;
 import io.github.rubr1c.fonts.Fonts;
@@ -9,6 +10,8 @@ import io.github.rubr1c.inventory.Items;
 import io.github.rubr1c.registries.ItemRegistry;
 import io.github.rubr1c.render.Camera;
 import io.github.rubr1c.render.Renderer;
+import io.github.rubr1c.util.Settings;
+import io.github.rubr1c.world.Border;
 import io.github.rubr1c.world.InfinitePlatform;
 import io.github.rubr1c.world.Platform;
 import io.github.rubr1c.Main;
@@ -23,6 +26,7 @@ public class GameScreen extends BaseScreen {
     private Renderer renderer;
     private BitmapFont font;
     private final Levels currentLevel;
+    private Texture background;
 
     public GameScreen(Main game, int levelNumber) {
         super(game);
@@ -43,8 +47,10 @@ public class GameScreen extends BaseScreen {
 
         ground = new InfinitePlatform(Color.GREEN);
         obs = currentLevel.createObstacles();
+        obs.addAll(currentLevel.createBorders());
 
         currentLevel.initializeItems(player);
+        background = currentLevel.getBackground();
 
         font = Fonts.MINECRAFT_SM.get();
     }
@@ -56,8 +62,8 @@ public class GameScreen extends BaseScreen {
         renderer.setFont(font);
         camera.update(player);
         ground.update(camera.getCamera());
-
-        renderer.render(camera.getCamera(), ground, obs, player);
+        renderer.render(background, camera.getCamera(), ground, obs, player);
+        Settings.renderCoordinates(player, camera);
     }
 
     @Override

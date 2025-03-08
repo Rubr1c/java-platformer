@@ -8,12 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 
 public class InfinitePlatform {
-    private static final float SEGMENT_WIDTH = 1920f;
-    private static final float PLATFORM_HEIGHT = 300f;
-    private static final float BUFFER_ZONE = SEGMENT_WIDTH * 2;
+    private static final int SEGMENT_WIDTH = 1920;
+    private static final int PLATFORM_HEIGHT = 500;
+    private static final int BUFFER_ZONE = SEGMENT_WIDTH * 2;
 
     private List<Platform> activePlatforms;
-    private float lastGeneratedX;
+    private int lastGeneratedX;
     private Color color;
 
     public InfinitePlatform(Color color) {
@@ -34,13 +34,13 @@ public class InfinitePlatform {
     }
 
     private void generatePlatformSegment() {
-        Platform platform = new Platform((int)lastGeneratedX, 0, (int)SEGMENT_WIDTH, (int)PLATFORM_HEIGHT, color);
+        Platform platform = new Platform((int) lastGeneratedX, -PLATFORM_HEIGHT + (PLATFORM_HEIGHT / 2), SEGMENT_WIDTH,
+                PLATFORM_HEIGHT, color);
         activePlatforms.add(platform);
         lastGeneratedX += SEGMENT_WIDTH;
     }
 
     public void update(OrthographicCamera camera) {
-        // Generate platforms ahead
         while (lastGeneratedX - camera.position.x < BUFFER_ZONE) {
             generatePlatformSegment();
         }

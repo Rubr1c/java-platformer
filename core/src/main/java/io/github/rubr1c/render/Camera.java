@@ -7,6 +7,7 @@ import io.github.rubr1c.entites.Entity;
 public class Camera {
     private OrthographicCamera camera;
     private final float lerp = 0.1f;
+    private final float VERTICAL_OFFSET = 200f; // Add vertical offset constant
 
     public Camera() {
         camera = new OrthographicCamera();
@@ -16,7 +17,7 @@ public class Camera {
     public void update(Entity target) {
         // Smoothly interpolate camera position towards target
         float targetX = target.getPos().x;
-        float targetY = target.getPos().y;
+        float targetY = target.getPos().y + VERTICAL_OFFSET; // Add vertical offset to camera position
 
         camera.position.x += (targetX - camera.position.x) * lerp;
         camera.position.y += (targetY - camera.position.y) * lerp;

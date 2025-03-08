@@ -2,17 +2,13 @@ package io.github.rubr1c.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import io.github.rubr1c.entites.Entity;
 import io.github.rubr1c.entites.Player;
-import io.github.rubr1c.movement.Movements;
-import io.github.rubr1c.screens.GameScreen;
 import io.github.rubr1c.util.Button;
-
-import java.util.function.Function;
 
 public class InputHandler {
 
     public static void HandlePlayer(Player player) {
+        Movements.applyGravity(player);
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             Movements.moveLeft(player);
         }
@@ -25,8 +21,6 @@ public class InputHandler {
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             player.setInvIsOpen(!player.isInvIsOpen());
         }
-
-        Movements.applyGravity(player);
     }
 
     public static void HandleButtonClick(Button button, Runnable action) {

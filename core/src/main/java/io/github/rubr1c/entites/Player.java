@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import io.github.rubr1c.inventory.Inventory;
 import io.github.rubr1c.util.Pos;
+import io.github.rubr1c.util.TextureUtil;
 
 public class Player extends Entity {
     private boolean invIsOpen;
@@ -16,17 +17,17 @@ public class Player extends Entity {
                   float jumpPower,
                   Texture texture,
                   Inventory inventory) {
-        super(pos, speed, gravity, width, height, jumpPower, texture, inventory);
+        super(pos, speed, gravity, width, height, jumpPower, texture, null);
         invIsOpen = false;
     }
 
     public Player() {
-        this(new Pos(0, 0),
+        this(new Pos(1000, 0),
             500F,
             9.81F,
             50, 50,
-            500,
-            new Texture(Gdx.files.internal("images/player.png")),
+            600,
+            TextureUtil.getBlank(),
             new Inventory(20));
     }
 

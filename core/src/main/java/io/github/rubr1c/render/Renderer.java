@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -34,34 +35,106 @@ public class Renderer {
         this.font = Fonts.MINECRAFT_LG.get();
     }
 
-    public void render(OrthographicCamera camera,
-                       InfinitePlatform ground,
-                       List<? extends Shape> obs,
-                       Player player) {
+    public void render(Texture background,
+            OrthographicCamera camera,
+            InfinitePlatform ground,
+            List<? extends Shape> obs,
+            Player player) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        batch.begin();
+        // Draw background with increased size (2x wider and taller)
+        float bgWidth = Gdx.graphics.getWidth() * 2.5f;
+        float bgHeight = Gdx.graphics.getHeight() * 2.5f;
+        // Center the background on the camera position
+        float bgX = camera.position.x - bgWidth / 2;
+        float bgY = camera.position.y - bgHeight / 2;
+        batch.draw(background, bgX, bgY, bgWidth, bgHeight);
+        batch.end();
+
+        // First render all shapes that don't use textures
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Render infinite platform
-        ground.render(shapeRenderer);
-
-        // Render obstacle
-        for (Shape shape: obs) {
-            shapeRenderer.setColor(shape.getColor());
-            shapeRenderer.rect(shape.getX(), shape.getY(), shape.getZ(), shape.getW());
+        for (Shape shape : obs) {
+            // Skip borders as they'll be rendered with textures
+            if (!(shape instanceof io.github.rubr1c.world.Border)) {
+                shapeRenderer.setColor(shape.getColor());
+                shapeRenderer.rect(shape.getX(), shape.getY(), shape.getZ(), shape.getW());
+            }
         }
 
+        ground.render(shapeRenderer);
+        shapeRenderer.end();
 
+        // Now render all borders with textures
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+
+        // Draw borders with texture
+        for (Shape shape : obs) {
+            if (shape instanceof io.github.rubr1c.world.Border) {
+                io.github.rubr1c.world.Border border = (io.github.rubr1c.world.Border) shape;
+                if (border.isUseTexture() && io.github.rubr1c.world.Border.getBorderTexture() != null) {
+                    // Get the border texture
+                    Texture borderTexture = io.github.rubr1c.world.Border.getBorderTexture();
+
+                    // Calculate how many times to repeat the texture
+                    float textureWidth = borderTexture.getWidth();
+                    float textureHeight = borderTexture.getHeight();
+
+                    // Calculate the number of tiles needed to cover the border
+                    int tilesX = Math.max(1, (int) Math.ceil(border.getZ() / textureWidth));
+                    int tilesY = Math.max(1, (int) Math.ceil(border.getW() / textureHeight));
+
+                    // Draw the texture tiles to cover the entire border
+                    for (int x = 0; x < tilesX; x++) {
+                        for (int y = 0; y < tilesY; y++) {
+                            // Calculate the position for this tile
+                            float tileX = border.getX() + (x * textureWidth);
+                            float tileY = border.getY() + (y * textureHeight);
+
+                            // Calculate the width and height for this tile (handle edge cases)
+                            float tileWidth = Math.min(textureWidth, border.getX() + border.getZ() - tileX);
+                            float tileHeight = Math.min(textureHeight, border.getY() + border.getW() - tileY);
+
+                            // Calculate texture coordinates for partial tiles
+                            float u2 = tileWidth / textureWidth;
+                            float v2 = tileHeight / textureHeight;
+
+                            // Draw the tile
+                            batch.draw(
+                                    borderTexture,
+                                    tileX, tileY,
+                                    tileWidth, tileHeight,
+                                    0, 0,
+                                    u2, v2);
+                        }
+                    }
+                } else {
+                    // Fallback to color rendering if texture is not available
+                    batch.end();
+                    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                    shapeRenderer.setColor(border.getColor());
+                    shapeRenderer.rect(border.getX(), border.getY(), border.getZ(), border.getW());
+                    shapeRenderer.end();
+                    batch.begin();
+                }
+            }
+        }
+
+        // Draw player
         if (player.getTexture() != null) {
-            batch.draw(player.getTexture(), player.getPos().x, player.getPos().y, player.getWidth(), player.getHeight());
+            batch.draw(player.getTexture(),
+                    player.getPos().x,
+                    player.getPos().y,
+                    player.getWidth(),
+                    player.getHeight());
         }
         batch.end();
 
-        if (player.isInvIsOpen()) {
+        if (player.isInvIsOpen() && player.getInventory() != null) {
             Map<Item, Integer> itemsMap = player.getInventory().getItems();
 
             // Calculate inventory dimensions
@@ -78,6 +151,7 @@ public class Renderer {
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
             // Draw filled rectangles
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.setColor(new Color(Color.GRAY.r, Color.GRAY.g, Color.GRAY.b, 0.5f));
             drawSlot(player, slotsPerRow, slotSize, startX, startY);
 
@@ -89,17 +163,14 @@ public class Renderer {
 
             // Disable blending after rendering inventory
             Gdx.gl.glDisable(GL20.GL_BLEND);
+            shapeRenderer.end();
         }
-        shapeRenderer.end();
-
-
-
     }
 
     private void drawSlot(Player player,
-                          int slotsPerRow,
-                          int slotSize,
-                          float startX, float startY) {
+            int slotsPerRow,
+            int slotSize,
+            float startX, float startY) {
         Map<Item, Integer> itemsMap = player.getInventory().getItems();
 
         // First pass: Draw all slot backgrounds
@@ -123,7 +194,8 @@ public class Renderer {
             float slotY = startY + row * slotSize;
 
             int currentSlot = i;
-            Optional<Item> slotItem = itemsMap.keySet().stream().filter(item -> item.getSlot() == currentSlot).findFirst();
+            Optional<Item> slotItem = itemsMap.keySet().stream().filter(item -> item.getSlot() == currentSlot)
+                    .findFirst();
 
             if (slotItem.isPresent() && slotItem.get().getTexture() != null) {
                 Item item = slotItem.get();
@@ -151,7 +223,6 @@ public class Renderer {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
     }
 
-
     public void setGame(Main game) {
         this.game = game;
     }
@@ -160,7 +231,7 @@ public class Renderer {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        for (Button button: buttons) {
+        for (Button button : buttons) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.setColor(button.getColor());
             shapeRenderer.rect(button.getX(), button.getY(), button.getZ(), button.getW());
@@ -179,7 +250,6 @@ public class Renderer {
                 }
             });
         }
-
 
     }
 
