@@ -13,6 +13,7 @@ import io.github.rubr1c.fonts.Fonts;
 import io.github.rubr1c.input.InputHandler;
 import io.github.rubr1c.inventory.Item;
 import io.github.rubr1c.screens.GameScreen;
+import io.github.rubr1c.screens.LevelScreen;
 import io.github.rubr1c.util.Button;
 import io.github.rubr1c.util.Shape;
 import io.github.rubr1c.world.InfinitePlatform;
@@ -173,8 +174,8 @@ public class Renderer {
             batch.end();
 
             InputHandler.HandleButtonClick(button, () -> {
-                if (game != null) {
-                    game.setScreen(new GameScreen(game));
+                if (game != null && button.getAction() != null) {
+                    button.getAction().run();
                 }
             });
         }

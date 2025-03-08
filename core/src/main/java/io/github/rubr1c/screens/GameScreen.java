@@ -13,7 +13,6 @@ import io.github.rubr1c.world.InfinitePlatform;
 import io.github.rubr1c.world.Platform;
 import io.github.rubr1c.Main;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GameScreen extends BaseScreen {
@@ -23,10 +22,16 @@ public class GameScreen extends BaseScreen {
     private Camera camera;
     private Renderer renderer;
     private BitmapFont font;
+    private final Levels currentLevel;
+
+    public GameScreen(Main game, int levelNumber) {
+        super(game);
+        this.currentLevel = Levels.LEVEL_1;
+        initialize();
+    }
 
     public GameScreen(Main game) {
-        super(game);
-        initialize();
+        this(game, 1); // Default to level 1
     }
 
     private void initialize() {
@@ -34,16 +39,16 @@ public class GameScreen extends BaseScreen {
         renderer = new Renderer();
 
         player = new Player();
-        player.setPos(200, 400);
+        player.setPos(currentLevel.getPlayerStartX(), currentLevel.getPlayerStartY());
 
         ground = new InfinitePlatform(Color.GREEN);
-        obs = new ArrayList<>();
-        obs.add(new Platform(500, 350, 50, 10, Color.RED));
-        ItemRegistry.register("d_sword", Items.SWORD.get());
-        player.addToInventory(Items.SWORD.get(), 2);
-        ItemRegistry.initItemTextures();
+        obs = currentLevel.createObstacles();
+
+        currentLevel.initializeItems(player);
+
         font = Fonts.MINECRAFT_SM.get();
     }
+
 
     @Override
     public void render(float delta) {

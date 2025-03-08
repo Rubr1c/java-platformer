@@ -28,7 +28,7 @@ public class MainMenuScreen extends BaseScreen {
         buttons = new ArrayList<>();
         buttons.add(new Button("Play", (Gdx.graphics.getWidth() - buttonWidth) / 2,
                             (Gdx.graphics.getHeight() - buttonHeight) / 2,
-                             buttonWidth, buttonHeight,
+                             buttonWidth, buttonHeight, () -> game.setScreen(new LevelScreen(game)),
                              Color.GRAY));
 
         font = Fonts.MINECRAFT_LG.get();
