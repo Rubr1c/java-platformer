@@ -19,7 +19,8 @@ public class InfinitePlatform {
     private static final int PLATFORM_Y_POSITION = 250; // Higher Y position for platforms
 
     private List<Platform> activePlatforms;
-    private int lastGeneratedX;
+    private int lastGeneratedRightX; // Track the rightmost platform edge
+    private int lastGeneratedLeftX; // Track the leftmost platform edge
     private Color color;
     private Texture platformTexture;
     private boolean useTexture = true;
@@ -31,12 +32,15 @@ public class InfinitePlatform {
 
     public InfinitePlatform() {
         activePlatforms = new ArrayList<>();
-        lastGeneratedX = -SEGMENT_WIDTH;
+        lastGeneratedRightX = 0;
+        lastGeneratedLeftX = 0;
         color = Color.GREEN;
 
         // Load the platform texture
         try {
             platformTexture = new Texture(Gdx.files.internal("images/beam.png"));
+            // Set texture filtering for better stretching quality
+            platformTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         } catch (Exception e) {
             System.err.println("Failed to load platform texture: " + e.getMessage());
             platformTexture = null;
@@ -47,34 +51,67 @@ public class InfinitePlatform {
     }
 
     private void generateInitialPlatforms() {
-        for (int i = 0; i < 3; i++) {
-            generatePlatformSegment();
+        // Generate initial platform at position 0
+        generatePlatformSegment(0);
+
+        // Generate platforms to the right
+        for (int i = 1; i < 3; i++) {
+            generatePlatformToRight();
+        }
+
+        // Generate platforms to the left
+        for (int i = 1; i < 3; i++) {
+            generatePlatformToLeft();
         }
     }
 
-    private void generatePlatformSegment() {
+    private void generatePlatformSegment(int x) {
         // Create the platform with a smaller collision height
         // The collision area starts COLLISION_OFFSET pixels from the top of the visual
         // platform
         Platform platform = new Platform(
-                (int) lastGeneratedX,
+                x,
                 PLATFORM_Y_POSITION + COLLISION_OFFSET, // Adjust collision Y position
                 SEGMENT_WIDTH,
                 COLLISION_HEIGHT, // Use smaller collision height
                 color);
         activePlatforms.add(platform);
-        lastGeneratedX += SEGMENT_WIDTH;
+
+        // Update tracking variables
+        if (x >= lastGeneratedRightX) {
+            lastGeneratedRightX = x + SEGMENT_WIDTH;
+        }
+        if (x <= lastGeneratedLeftX || lastGeneratedLeftX == 0) {
+            lastGeneratedLeftX = x;
+        }
+    }
+
+    private void generatePlatformToRight() {
+        generatePlatformSegment(lastGeneratedRightX);
+    }
+
+    private void generatePlatformToLeft() {
+        generatePlatformSegment(lastGeneratedLeftX - SEGMENT_WIDTH);
     }
 
     public void update(OrthographicCamera camera) {
-        while (lastGeneratedX - camera.position.x < BUFFER_ZONE) {
-            generatePlatformSegment();
+        // Generate platforms to the right as needed
+        while (lastGeneratedRightX - camera.position.x < BUFFER_ZONE) {
+            generatePlatformToRight();
         }
 
+        // Generate platforms to the left as needed
+        while (camera.position.x - (lastGeneratedLeftX + SEGMENT_WIDTH) < -BUFFER_ZONE) {
+            generatePlatformToLeft();
+        }
+
+        // Remove platforms that are too far away (both left and right)
         Iterator<Platform> iterator = activePlatforms.iterator();
         while (iterator.hasNext()) {
             Platform platform = iterator.next();
-            if (platform.getX() + SEGMENT_WIDTH < camera.position.x - BUFFER_ZONE) {
+            // Remove if too far to the left or right
+            if (platform.getX() + SEGMENT_WIDTH < camera.position.x - BUFFER_ZONE ||
+                    platform.getX() > camera.position.x + BUFFER_ZONE) {
                 iterator.remove();
             }
         }
@@ -87,11 +124,6 @@ public class InfinitePlatform {
             for (Platform platform : activePlatforms) {
                 // For debugging, you can show the actual collision area
                 shapeRenderer.rect(platform.getX(), platform.getY(), platform.getZ(), platform.getW());
-
-                // Optionally, show the full visual area with a different color/alpha
-                // shapeRenderer.setColor(new Color(color.r, color.g, color.b, 0.3f));
-                // shapeRenderer.rect(platform.getX(), PLATFORM_Y_POSITION, platform.getZ(),
-                // PLATFORM_HEIGHT);
             }
         }
     }
@@ -123,12 +155,6 @@ public class InfinitePlatform {
                             0, 0,
                             u2, 1);
                 }
-
-                // Uncomment for debugging - shows the collision area
-                // batch.setColor(1, 0, 0, 0.5f);
-                // batch.draw(platformTexture, platform.getX(), platform.getY(),
-                // platform.getZ(), platform.getW());
-                // batch.setColor(1, 1, 1, 1);
             }
         }
     }

@@ -57,8 +57,9 @@ public class Renderer {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (Shape shape : obs) {
-            // Skip borders as they'll be rendered with textures
-            if (!(shape instanceof io.github.rubr1c.world.Border)) {
+            // Skip borders and platforms as they'll be rendered with textures
+            if (!(shape instanceof io.github.rubr1c.world.Border) &&
+                    !(shape instanceof io.github.rubr1c.world.Platform)) {
                 shapeRenderer.setColor(shape.getColor());
                 shapeRenderer.rect(shape.getX(), shape.getY(), shape.getZ(), shape.getW());
             }
@@ -84,6 +85,15 @@ public class Renderer {
         // Render ground with texture AFTER player so it appears above/in front of
         // player
         ground.renderTexture(batch);
+
+        // Draw regular platforms with texture
+        for (Shape shape : obs) {
+            if (shape instanceof io.github.rubr1c.world.Platform &&
+                    !(shape instanceof io.github.rubr1c.world.Border)) {
+                io.github.rubr1c.world.Platform platform = (io.github.rubr1c.world.Platform) shape;
+                platform.renderWithTexture(batch);
+            }
+        }
 
         // Draw borders with texture
         for (Shape shape : obs) {
@@ -241,6 +251,10 @@ public class Renderer {
         if (font != null) {
             font.dispose();
         }
+        // Dispose of platform texture
+        io.github.rubr1c.world.Platform.disposeTexture();
+        // Dispose of border texture
+        io.github.rubr1c.world.Border.disposeTexture();
     }
 
     public BitmapFont getFont() {
@@ -249,5 +263,49 @@ public class Renderer {
 
     public void setFont(BitmapFont font) {
         this.font = font;
+    }
+
+    /**
+     * Draw a texture at the specified position and size
+     *
+     * @param texture The texture to draw
+     * @param x       The x position
+     * @param y       The y position
+     * @param width   The width
+     * @param height  The height
+     */
+    public void drawTexture(Texture texture, float x, float y, int width, int height) {
+        if (texture != null) {
+            batch.begin();
+            batch.draw(texture, x, y, width, height);
+            batch.end();
+        }
+    }
+
+    /**
+     * Set the projection matrix to use camera coordinates
+     *
+     * @param camera The camera to use for projection
+     */
+    public void setProjectionMatrixToCamera(OrthographicCamera camera) {
+        batch.setProjectionMatrix(camera.combined);
+    }
+
+    /**
+     * Draw a texture at the specified position and size using the camera's
+     * projection matrix
+     *
+     * @param texture The texture to draw
+     * @param x       The x position in world coordinates
+     * @param y       The y position in world coordinates
+     * @param width   The width
+     * @param height  The height
+     */
+    public void drawTextureWithCamera(Texture texture, float x, float y, int width, int height) {
+        if (texture != null) {
+            batch.begin();
+            batch.draw(texture, x, y, width, height);
+            batch.end();
+        }
     }
 }

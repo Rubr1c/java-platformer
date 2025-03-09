@@ -6,18 +6,25 @@ import com.badlogic.gdx.graphics.Texture;
 import io.github.rubr1c.entites.Player;
 import io.github.rubr1c.inventory.Items;
 import io.github.rubr1c.registries.ItemRegistry;
+import io.github.rubr1c.util.Pos;
+import io.github.rubr1c.util.TextureUtil;
 import io.github.rubr1c.world.Border;
 import io.github.rubr1c.world.Platform;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public enum Levels {
     LEVEL_1(1) {
         @Override
         public List<Platform> createObstacles() {
             List<Platform> obstacles = new ArrayList<>();
-            obstacles.add(new Platform(500, 300, 50, 10, Color.RED));
+            obstacles.add(new Platform(500, 400, 60, 10));
+            obstacles.add(new Platform(700, 450, 60, 10));
+            obstacles.add(new Platform(800, 475, 60, 10));
+            obstacles.add(new Platform(1000, 550, 60, 10));
             return obstacles;
         }
 
@@ -32,6 +39,11 @@ public enum Levels {
         }
 
         @Override
+        public Pos getPlayerStartPos() {
+            return new Pos(200, 400);
+        }
+
+        @Override
         public void initializeItems(Player player) {
             ItemRegistry.register("d_sword", Items.SWORD.get());
             // player.addToInventory(Items.SWORD.get(), 2);
@@ -43,13 +55,20 @@ public enum Levels {
             // Left border - positioned just before the first platform
             borders.add(new Border(-200, -100, 300, 2000));
             // Right border - positioned after the platform
-            borders.add(new Border(2000, -100, 300, 2000));
+            borders.add(new Border(5000, -100, 300, 2000));
             return borders;
         }
 
         @Override
         public Texture getBackground() {
-            return new Texture(Gdx.files.internal("images/bg.png"));
+            return TextureUtil.loadFrom("images/bg.png");
+        }
+
+        @Override
+        public Map<Pos, Boolean> getCheckpoints() {
+            Map<Pos, Boolean> checkpoints = new HashMap<>();
+            checkpoints.put(new Pos(1025, 580), false);
+            return checkpoints;
         }
     };
 
@@ -74,4 +93,8 @@ public enum Levels {
     public abstract List<Border> createBorders();
 
     public abstract Texture getBackground();
+
+    public abstract Map<Pos, Boolean> getCheckpoints();
+
+    public abstract Pos getPlayerStartPos();
 }
