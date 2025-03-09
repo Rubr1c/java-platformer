@@ -20,8 +20,10 @@ public class Border extends Platform {
         // Load the texture once for all borders
         try {
             borderTexture = new Texture(Gdx.files.internal("images/border.png"));
-            // Set texture to repeat for tiling
-            borderTexture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+            // Set texture filtering for better stretching quality
+            borderTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            // We're no longer using repeat wrapping since we're stretching the texture
+            // borderTexture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
         } catch (Exception e) {
             System.err.println("Failed to load border texture: " + e.getMessage());
             borderTexture = null;
@@ -75,7 +77,10 @@ public class Border extends Platform {
                 borderTexture.dispose();
             }
             borderTexture = new Texture(Gdx.files.internal("images/border.png"));
-            borderTexture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+            // Set texture filtering for better stretching quality
+            borderTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            // We're no longer using repeat wrapping since we're stretching the texture
+            // borderTexture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
         } catch (Exception e) {
             System.err.println("Failed to reload border texture: " + e.getMessage());
             borderTexture = null;

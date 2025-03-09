@@ -44,9 +44,8 @@ public class Renderer {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
-        // Draw background with increased size (2x wider and taller)
-        float bgWidth = Gdx.graphics.getWidth() * 2.5f;
-        float bgHeight = Gdx.graphics.getHeight() * 2.5f;
+        float bgWidth = Gdx.graphics.getWidth();
+        float bgHeight = Gdx.graphics.getHeight();
         // Center the background on the camera position
         float bgX = camera.position.x - bgWidth / 2;
         float bgY = camera.position.y - bgHeight / 2;
@@ -65,12 +64,26 @@ public class Renderer {
             }
         }
 
+        // Render ground with ShapeRenderer (fallback if texture not available)
         ground.render(shapeRenderer);
         shapeRenderer.end();
 
-        // Now render all borders with textures
+        // Now render all textured elements
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+
+        // Draw player FIRST so it appears below/behind platforms
+        if (player.getTexture() != null) {
+            batch.draw(player.getTexture(),
+                    player.getPos().x,
+                    player.getPos().y,
+                    player.getWidth(),
+                    player.getHeight());
+        }
+
+        // Render ground with texture AFTER player so it appears above/in front of
+        // player
+        ground.renderTexture(batch);
 
         // Draw borders with texture
         for (Shape shape : obs) {
@@ -80,38 +93,15 @@ public class Renderer {
                     // Get the border texture
                     Texture borderTexture = io.github.rubr1c.world.Border.getBorderTexture();
 
-                    // Calculate how many times to repeat the texture
-                    float textureWidth = borderTexture.getWidth();
-                    float textureHeight = borderTexture.getHeight();
-
-                    // Calculate the number of tiles needed to cover the border
-                    int tilesX = Math.max(1, (int) Math.ceil(border.getZ() / textureWidth));
-                    int tilesY = Math.max(1, (int) Math.ceil(border.getW() / textureHeight));
-
-                    // Draw the texture tiles to cover the entire border
-                    for (int x = 0; x < tilesX; x++) {
-                        for (int y = 0; y < tilesY; y++) {
-                            // Calculate the position for this tile
-                            float tileX = border.getX() + (x * textureWidth);
-                            float tileY = border.getY() + (y * textureHeight);
-
-                            // Calculate the width and height for this tile (handle edge cases)
-                            float tileWidth = Math.min(textureWidth, border.getX() + border.getZ() - tileX);
-                            float tileHeight = Math.min(textureHeight, border.getY() + border.getW() - tileY);
-
-                            // Calculate texture coordinates for partial tiles
-                            float u2 = tileWidth / textureWidth;
-                            float v2 = tileHeight / textureHeight;
-
-                            // Draw the tile
-                            batch.draw(
-                                    borderTexture,
-                                    tileX, tileY,
-                                    tileWidth, tileHeight,
-                                    0, 0,
-                                    u2, v2);
-                        }
-                    }
+                    // Simply stretch the texture to fit the entire border
+                    // This will make the texture stretch to the exact size of the border
+                    batch.draw(
+                            borderTexture,
+                            border.getX(), border.getY(), // Position
+                            border.getZ(), border.getW(), // Size (width, height)
+                            0, 0, // Source position in texture
+                            1, 1, // Source size in texture (full texture)
+                            false, false); // No flipping
                 } else {
                     // Fallback to color rendering if texture is not available
                     batch.end();
@@ -124,14 +114,6 @@ public class Renderer {
             }
         }
 
-        // Draw player
-        if (player.getTexture() != null) {
-            batch.draw(player.getTexture(),
-                    player.getPos().x,
-                    player.getPos().y,
-                    player.getWidth(),
-                    player.getHeight());
-        }
         batch.end();
 
         if (player.isInvIsOpen() && player.getInventory() != null) {
@@ -255,6 +237,10 @@ public class Renderer {
 
     public void dispose() {
         shapeRenderer.dispose();
+        batch.dispose();
+        if (font != null) {
+            font.dispose();
+        }
     }
 
     public BitmapFont getFont() {

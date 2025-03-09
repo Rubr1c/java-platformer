@@ -41,9 +41,9 @@ public enum Levels {
         public List<Border> createBorders() {
             List<Border> borders = new ArrayList<>();
             // Left border - positioned just before the first platform
-            borders.add(new Border(0, -100, 100, 2000, Color.GRAY));
+            borders.add(new Border(-200, -100, 300, 2000));
             // Right border - positioned after the platform
-            borders.add(new Border(2000, -100, 100, 2000, Color.GRAY));
+            borders.add(new Border(2000, -100, 300, 2000));
             return borders;
         }
 

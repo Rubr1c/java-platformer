@@ -27,7 +27,7 @@ public class Player extends Entity {
             9.81F,
             50, 50,
             600,
-            TextureUtil.getBlank(),
+            new Texture(Gdx.files.internal("images/player.png")),
             new Inventory(20));
     }
 
